@@ -48,7 +48,7 @@ class CustomUserViewSet(UserViewSet):
         methods=['post', 'delete'],
         permission_classes=[IsAuthenticated]
     )
-    def sub(self, request, **kwargs):
+    def subscribe(self, request, **kwargs):
         author_id = self.kwargs.get('id')
         author = get_object_or_404(User, id=author_id)
 
@@ -70,7 +70,7 @@ class CustomUserViewSet(UserViewSet):
         detail=False,
         permission_classes=[IsAuthenticated]
     )
-    def subs(self, request):
+    def subscriptions(self, request):
         queryset = User.objects.filter(subscribing__user=request.user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(pages,
@@ -81,7 +81,7 @@ class CustomUserViewSet(UserViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly, IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticated, IsAuthorOrReadOnly, IsAdminOrReadOnly)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -99,7 +99,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['post', 'delete'],
         permission_classes=[IsAuthenticated]
     )
-    def fav(self, request, pk):
+    def favorite(self, request, pk):
         if request.method == 'POST':
             return self.add_to(Favourite, request.user, pk)
         return self.remove_from(Favourite, request.user, pk)
@@ -109,7 +109,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['post', 'delete'],
         permission_classes=[IsAuthenticated]
     )
-    def cart(self, request, pk):
+    def shopping_cart(self, request, pk):
         if request.method == 'POST':
             return self.add_to(ShoppingCart, request.user, pk)
         return self.remove_from(ShoppingCart, request.user, pk)

@@ -1,7 +1,7 @@
 version: '3.3'
 
 volumes:
-  pg_data1:
+  pg_data2:
   static:
   media:
 
@@ -9,7 +9,7 @@ services:
   db:
     image: postgres:13
     volumes:
-      - pg_data1:/var/lib/postgresql/data
+      - pg_data2:/var/lib/postgresql/data
     env_file: ../.env
   frontend:
     build:
@@ -24,11 +24,11 @@ services:
     depends_on:
         - backend
     volumes:
+      - static:/staticfiles
+      - media:/app/media
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
-      - static:/staticfiles/
-      - media:/app/media
   backend:
     env_file: ../.env
     build:  ../backend
