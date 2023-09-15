@@ -1,7 +1,6 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
-
+from django.db import models
 
 User = get_user_model()
 
@@ -88,11 +87,6 @@ class IngredientInRecipe(models.Model):
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
-
-    def __str__(self):
-        return (
-            f'{self.ingredient.name} ({self.ingredient.measurement_unit}) - {self.amount} '
-        )
 
 
 class Favourite(models.Model):
