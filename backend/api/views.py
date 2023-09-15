@@ -17,7 +17,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from users.models import Subscribe
 from recipes.models import Ingredient, Tag, Recipe, Favourite, ShoppingCart, IngredientInRecipe
 from core.filters import IngredientFilter, RecipeFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly, IsSuperUserOrOwnerOrReadOnly
 from rest_framework import viewsets
 
 
@@ -53,15 +53,15 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, id=author_id)
 
         if request.method == 'DELETE':
-            subscription = get_object_or_404(Subscribe,
+                subscription = get_object_or_404(Subscribe,
                                              user=request.user,
                                              author=author)
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+                subscription.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
         serializer = SubscribeSerializer(author,
-                                         data=request.data,
-                                         context={"request": request})
+                                             data=request.data,
+                                             context={"request": request})
         serializer.is_valid(raise_exception=True)
         Subscribe.objects.create(user=request.user, author=author)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -81,7 +81,7 @@ class CustomUserViewSet(UserViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticated, IsAuthorOrReadOnly, IsAdminOrReadOnly)
+    permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
