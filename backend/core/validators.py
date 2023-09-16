@@ -1,7 +1,6 @@
 import re
 
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 LEGAL_CHARACTERS_ERROR = (
     "Нельзя использовать символ(ы): " "{forbidden_chars} в имени пользователя."

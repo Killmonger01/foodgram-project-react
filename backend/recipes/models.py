@@ -12,8 +12,7 @@ MEASUREMENT_UNIT_MAX_LENGTH = 50
 class Ingredient(models.Model):
     name = models.CharField(
         verbose_name="Название",
-        max_length=NAME_MAX_LENGTH,
-        )
+        max_length=NAME_MAX_LENGTH,)
     measurement_unit = models.CharField(
         verbose_name='Измерение',
         max_length=MEASUREMENT_UNIT_MAX_LENGTH)
