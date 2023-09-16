@@ -4,14 +4,13 @@ from django.db.models import F
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient,  Recipe, Tag, IngredientInRecipe
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
 from users.models import Subscribe
-
 
 User = get_user_model()
 
@@ -41,19 +40,6 @@ class CustomUserSerializer(UserSerializer):
         if user.is_anonymous:
             return False
         return Subscribe.objects.filter(user=user, author=obj).exists()
-
-
-class RecipeShortSerializer(ModelSerializer):
-    image = Base64ImageField()
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
-        )
 
 
 class SubscribeSerializer(CustomUserSerializer):
@@ -152,7 +138,6 @@ class RecipeReadSerializer(ModelSerializer):
         return user.shopping_cart.filter(recipe=obj).exists()
 
 
-
 class IngredientInRecipeWriteSerializer(ModelSerializer):
     id = IntegerField(write_only=True)
 
@@ -208,7 +193,7 @@ class RecipeWriteSerializer(ModelSerializer):
         tags_list = []
         for tag in tags:
             if tag in tags_list:
-                raise ValidationError({'tags': 'Теги должны быть уникальными!'})
+                raise ValidationError({'tags': 'Теги должны быть уникальными'})
             tags_list.append(tag)
         return value
 
@@ -239,7 +224,8 @@ class RecipeWriteSerializer(ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         instance.ingredients.clear()
-        self.create_ingredients_amounts(recipe=instance, ingredients=ingredients)
+        self.create_ingredients_amounts(recipe=instance,
+                                        ingredients=ingredients)
         instance.save()
         return instance
 

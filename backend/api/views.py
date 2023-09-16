@@ -1,25 +1,28 @@
 from datetime import datetime
-from django.http import HttpResponse
+
+from core.filters import IngredientFilter, RecipeFilter
 from core.pagination import CustomPagination
-from .serializers import CustomUserSerializer, SubscribeSerializer, TagSerializer, IngredientSerializer, RecipeReadSerializer, RecipeWriteSerializer, RecipeShortSerializer
 from django.contrib.auth import get_user_model
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from django.db.models import Sum
-from rest_framework.status import HTTP_400_BAD_REQUEST
-from rest_framework import status
-from rest_framework.permissions import SAFE_METHODS
+from recipes.models import (Favourite, Ingredient, IngredientInRecipe, Recipe,
+                            ShoppingCart, Tag)
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from users.models import Subscribe
-from recipes.models import Ingredient, Tag, Recipe, Favourite, ShoppingCart, IngredientInRecipe
-from core.filters import IngredientFilter, RecipeFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly, IsSuperUserOrOwnerOrReadOnly
-from rest_framework import viewsets
 
+from .permissions import IsAdminOrReadOnly, IsSuperUserOrOwnerOrReadOnly
+from .serializers import (CustomUserSerializer, IngredientSerializer,
+                          RecipeReadSerializer, RecipeShortSerializer,
+                          RecipeWriteSerializer, SubscribeSerializer,
+                          TagSerializer)
 
 User = get_user_model()
 
@@ -53,15 +56,15 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, id=author_id)
 
         if request.method == 'DELETE':
-                subscription = get_object_or_404(Subscribe,
+            subscription = get_object_or_404(Subscribe,
                                              user=request.user,
                                              author=author)
-                subscription.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
         serializer = SubscribeSerializer(author,
-                                             data=request.data,
-                                             context={"request": request})
+                                         data=request.data,
+                                         context={"request": request})
         serializer.is_valid(raise_exception=True)
         Subscribe.objects.create(user=request.user, author=author)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -116,7 +119,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def add_to(self, model, user, pk):
         if model.objects.filter(user=user, recipe__id=pk).exists():
-            return Response({'error': 'Recipe already added!'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Recipe already added!'},
+                            status=status.HTTP_400_BAD_REQUEST)
         recipe = get_object_or_404(Recipe, id=pk)
         model.objects.create(user=user, recipe=recipe)
         serializer = RecipeShortSerializer(recipe)
@@ -127,7 +131,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if obj.exists():
             obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({'error': 'Recipe already removed!'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Recipe already removed!'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=False,
