@@ -1,15 +1,14 @@
-from core.validators import validate_username
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import UniqueConstraint
 
+from core.constans import (EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH,
+                           PASSWORD_MAX_LENGTH, FIRST_NAME_MAX_LENGTH,
+                           LAST_NAME_MAX_LENGTH)
+from core.validators import validate_username
+
 
 class User(AbstractUser):
-    EMAIL_MAX_LENGTH = 254
-    USERNAME_MAX_LENGTH = 150
-    PASSWORD_MAX_LENGTH = 150
-    FIRST_NAME_MAX_LENGTH = 150
-    LAST_NAME_MAX_LENGTH = 150
     email = models.EmailField(verbose_name="Электронная почта",
                               max_length=EMAIL_MAX_LENGTH,
                               unique=True,)
@@ -51,7 +50,6 @@ class Subscribe(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
         constraints = [
             UniqueConstraint(fields=['user', 'author'],
                              name='unique_subscription')

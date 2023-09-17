@@ -1,18 +1,16 @@
-from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
-from users.models import Subscribe
 
-User = get_user_model()
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from users.models import Subscribe, User
 
 
 class UserCreateSerializerWithEmail(UserCreateSerializer):
@@ -83,13 +81,13 @@ class SubscribeSerializer(CustomUserSerializer):
 class TagSerializer(ModelSerializer):
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = ('name', 'color', 'slug',)
 
 
 class IngredientSerializer(ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = ('name', 'measurement_unit',)
 
 
 class RecipeReadSerializer(ModelSerializer):

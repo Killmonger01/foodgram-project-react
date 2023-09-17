@@ -1,21 +1,29 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-User = get_user_model()
-
-NAME_MAX_LENGTH = 300
-COLOR_MAX_LENGTH = 7
-MEASUREMENT_UNIT_MAX_LENGTH = 50
+from core.constans import (NAME_MAX_LENGTH, MEASUREMENT_UNIT_MAX_LENGTH,
+                           COLOR_MAX_LENGTH)
+from users.models import User
 
 
 class Ingredient(models.Model):
     name = models.CharField(
         verbose_name="Название",
-        max_length=NAME_MAX_LENGTH,)
+        max_length=NAME_MAX_LENGTH,
+        unique=True)
     measurement_unit = models.CharField(
         verbose_name='Измерение',
-        max_length=MEASUREMENT_UNIT_MAX_LENGTH)
+        max_length=MEASUREMENT_UNIT_MAX_LENGTH,
+        unique=True)
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        ordering = ['name']
+
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
@@ -30,6 +38,13 @@ class Tag(models.Model):
     slug = models.SlugField(
         verbose_name="Слаг",
         unique=True)
+
+    class Meta:
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -62,8 +77,17 @@ class Recipe(models.Model):
         related_name="recipes",)
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
-        validators=[MinValueValidator(1, message='Минимальное значение 1!')]
+        validators=[MinValueValidator(1, message='Минимальное значение 1!'),
+                    MaxValueValidator(100)]
     )
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
 
 
 class IngredientInRecipe(models.Model):
@@ -80,12 +104,18 @@ class IngredientInRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         'Количество',
-        validators=[MinValueValidator(1, message='Минимальное количество 1!')]
+        validators=[MinValueValidator(1, message='Минимальное количество 1!'),
+                    MaxValueValidator(100)]
     )
 
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
+
+    def __str__(self):
+        return (
+            f'{self.ingredient.name}, ({self.ingredient.measurement_unit})'
+        )
 
 
 class Favourite(models.Model):
