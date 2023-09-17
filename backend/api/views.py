@@ -14,7 +14,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from core.filters import IngredientFilter, RecipeFilter
 from core.pagination import CustomPagination
 from .permissions import IsAdminOrReadOnly, IsSuperUserOrOwnerOrReadOnly
-from recipes.models import Favourite, Ingredient, IngredientInRecipe, Recipe, ShoppingCart, Tag
+from recipes.models import (Favourite, Ingredient, IngredientInRecipe,
+                            Recipe, ShoppingCart, Tag)
 from .serializers import (
     CustomUserSerializer,
     IngredientSerializer,
