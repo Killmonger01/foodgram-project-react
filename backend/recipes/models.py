@@ -8,7 +8,7 @@ from users.models import User
 
 class Ingredient(models.Model):
     name = models.CharField(
-        verbose_name="Название",
+        verbose_name='Название',
         max_length=NAME_MAX_LENGTH,
         unique=True)
     measurement_unit = models.CharField(
@@ -19,7 +19,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
@@ -27,15 +27,15 @@ class Ingredient(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(
-        verbose_name="Тэг",
+        verbose_name='Тэг',
         max_length=NAME_MAX_LENGTH,
         unique=True)
     color = models.CharField(
-        verbose_name="Цвет",
+        verbose_name='Цвет',
         max_length=COLOR_MAX_LENGTH,
         unique=True)
     slug = models.SlugField(
-        verbose_name="Слаг",
+        verbose_name='Слаг',
         unique=True)
 
     class Meta:
@@ -49,31 +49,31 @@ class Tag(models.Model):
 class Recipe(models.Model):
     TEXT_MAX_LENGTH = 250
     name = models.CharField(
-        verbose_name="Название",
+        verbose_name='Название',
         max_length=NAME_MAX_LENGTH
     )
     author = models.ForeignKey(
         User,
-        verbose_name="Автор",
+        verbose_name='Автор',
         related_name="recipes",
         on_delete=models.SET_NULL,
         null=True)
     image = models.ImageField(
-        verbose_name="Изображение",
-        upload_to="recipe_images/",
+        verbose_name='Изображение',
+        upload_to='recipe_images/',
     )
     text = models.TextField(
-        verbose_name="Описание блюда",
+        verbose_name='Описание блюда',
         max_length=TEXT_MAX_LENGTH,
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        verbose_name="Ингредиенты",
-        related_name="recipes",)
+        verbose_name='Ингредиенты',
+        related_name='recipes',)
     tags = models.ManyToManyField(
         Tag,
-        verbose_name="Тег",
-        related_name="recipes",)
+        verbose_name='Тег',
+        related_name='recipes',)
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления',
         validators=[MinValueValidator(1, message='Минимальное значение 1!'),
@@ -81,7 +81,6 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ['-id']
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 

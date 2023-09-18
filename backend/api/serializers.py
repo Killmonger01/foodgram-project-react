@@ -12,6 +12,8 @@ from rest_framework.serializers import ModelSerializer
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscribe, User
 
+import re
+
 
 class UserCreateSerializerWithEmail(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
@@ -134,6 +136,18 @@ class RecipeReadSerializer(ModelSerializer):
         if user.is_anonymous:
             return False
         return user.shopping_cart.filter(recipe=obj).exists()
+
+    def isdigit(self, obj):
+        name = obj.name
+        if name.isdigit():
+            return False
+        return name
+
+    def not_sign(self, obj):
+        chars = "".join(set(re.compile(r"[\w.@+-]").sub("", obj.name)))
+        if chars:
+            return False
+        return obj.name
 
 
 class IngredientInRecipeWriteSerializer(ModelSerializer):
