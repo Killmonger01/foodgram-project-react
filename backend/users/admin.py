@@ -18,10 +18,11 @@ class UserAdmin(UserAdmin):
     )
     readonly_fields = ('sub_count', 'recipe_count')
     list_filter = ('email', 'first_name')
+
     @display(description='Количество в подписчиков')
     def sub_count(self, obj):
         return obj.subscriber.count()
-    
+
     @display(description='Количество рецептов')
     def recipe_count(self, obj):
         return obj.recipes.count()
@@ -30,4 +31,3 @@ class UserAdmin(UserAdmin):
 @admin.register(Subscribe)
 class SubscribeAdmin(admin.ModelAdmin):
     list_display = ('user', 'author',)
-
