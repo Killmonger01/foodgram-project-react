@@ -21,7 +21,7 @@ class UserAdmin(UserAdmin):
 
     @display(description='Количество в подписчиков')
     def sub_count(self, obj):
-        return obj.subscriber.count()
+        return obj.subscriber1.count()
 
     @display(description='Количество рецептов')
     def recipe_count(self, obj):

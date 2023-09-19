@@ -2,13 +2,14 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-SECRET_KEY = 'django-insecure-&lsy^z)108isar+rd!0&)fq@50vps-55m#1o*^xino__9&ib=a'
-
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
+    'colorfield'
 ]
 
 MIDDLEWARE = [
@@ -89,9 +91,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 

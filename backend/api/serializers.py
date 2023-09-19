@@ -1,3 +1,5 @@
+import re
+
 from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
@@ -11,8 +13,6 @@ from rest_framework.serializers import ModelSerializer
 
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscribe, User
-
-import re
 
 
 class UserCreateSerializerWithEmail(UserCreateSerializer):
@@ -137,18 +137,6 @@ class RecipeReadSerializer(ModelSerializer):
             return False
         return user.shopping_cart.filter(recipe=obj).exists()
 
-    def isdigit(self, obj):
-        name = obj.name
-        if name.isdigit():
-            return False
-        return name
-
-    def not_sign(self, obj):
-        chars = "".join(set(re.compile(r"[\w.@+-]").sub("", obj.name)))
-        if chars:
-            return False
-        return obj.name
-
 
 class IngredientInRecipeWriteSerializer(ModelSerializer):
     id = IntegerField(write_only=True)
@@ -208,6 +196,18 @@ class RecipeWriteSerializer(ModelSerializer):
                 raise ValidationError({'tags': 'Теги должны быть уникальными'})
             tags_list.append(tag)
         return value
+
+    def isdigit(self, obj):
+        name = obj.name
+        if name.isdigit():
+            return False
+        return name
+ 
+    def not_sign(self, obj):
+        chars = "".join(set(re.compile(r"[\w.@+-]").sub("", obj.name)))
+        if chars:
+            return False
+
 
     @transaction.atomic
     def create_ingredients_amounts(self, ingredients, recipe):

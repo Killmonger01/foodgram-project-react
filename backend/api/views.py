@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,12 +7,20 @@ from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ReadOnlyModelViewSet
+from djoser.views import UserViewSet
+
+from .permissions import IsAdminOrReadOnly, IsSuperUserOrOwnerOrReadOnly
+from .utils import generate_shopping_list
 
 from core.filters import IngredientFilter, RecipeFilter
 from core.pagination import CustomPagination
-from .permissions import IsAdminOrReadOnly, IsSuperUserOrOwnerOrReadOnly
-from recipes.models import (Favourite, Ingredient, IngredientInRecipe,
-                            Recipe, ShoppingCart, Tag)
+from recipes.models import (
+    Favourite,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
 from .serializers import (
     CustomUserSerializer,
     IngredientSerializer,
@@ -25,7 +30,6 @@ from .serializers import (
     SubscribeSerializer,
     TagSerializer,
 )
-from djoser.views import UserViewSet
 from users.models import Subscribe, User
 
 
@@ -140,31 +144,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=False,
         permission_classes=[IsAuthenticated]
     )
-    def dl_cart(self, request):
-        if not request.user.shopping_cart.exists():
+    def delete_cart(self, request):
+        user = request.user
+        shopping_list = generate_shopping_list(user)
+
+        if not shopping_list:
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
-        ).annotate(amount=Sum('amount'))
-
-        today = datetime.today()
-        shopping_list = (
-            f'Shopping list for: {request.user.get_full_name()}\n\n'
-            f'Date: {today:%Y-%m-%d}\n\n'
-        )
-        shopping_list += '\n'.join([
-            f'- {ingredient["ingredient__name"]} '
-            f'({ingredient["ingredient__measurement_unit"]})'
-            f' - {ingredient["amount"]}'
-            for ingredient in ingredients
-        ])
-        shopping_list += f'\n\nFoodgram ({today:%Y})'
-
-        filename = f'{request.user.username}_shopping_list.txt'
+        filename = f'{user.username}_shopping_list.txt'
         response = HttpResponse(shopping_list, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'
 

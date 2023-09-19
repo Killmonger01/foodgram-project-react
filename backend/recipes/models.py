@@ -1,8 +1,9 @@
+from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from core.constans import (NAME_MAX_LENGTH, MEASUREMENT_UNIT_MAX_LENGTH,
-                           COLOR_MAX_LENGTH)
+                           TEXT_MAX_LENGTH)
 from users.models import User
 
 
@@ -30,10 +31,7 @@ class Tag(models.Model):
         verbose_name='Тэг',
         max_length=NAME_MAX_LENGTH,
         unique=True)
-    color = models.CharField(
-        verbose_name='Цвет',
-        max_length=COLOR_MAX_LENGTH,
-        unique=True)
+    color = ColorField(verbose_name='Цвет')
     slug = models.SlugField(
         verbose_name='Слаг',
         unique=True)
@@ -47,7 +45,6 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    TEXT_MAX_LENGTH = 250
     name = models.CharField(
         verbose_name='Название',
         max_length=NAME_MAX_LENGTH
@@ -116,23 +113,27 @@ class IngredientInRecipe(models.Model):
         )
 
 
-class Favourite(models.Model):
-    """ Модель Избранное """
-
+class SupportFavoriteCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorites',
         verbose_name='Пользователь',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorites',
         verbose_name='Рецепт',
     )
 
     class Meta:
+        abstract = True
+
+
+class Favourite(SupportFavoriteCart):
+    """ Модель Избранное """
+
+    class Meta:
+        default_related_name = 'favorites'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
         constraints = [
@@ -144,23 +145,11 @@ class Favourite(models.Model):
         return f'{self.user} добавил "{self.recipe}" в Избранное'
 
 
-class ShoppingCart(models.Model):
+class ShoppingCart(SupportFavoriteCart):
     """ Модель Корзина покупок """
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='Пользователь',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='Рецепт',
-    )
-
     class Meta:
+        default_related_name = 'shopping_cart'
         verbose_name = 'Корзина покупок'
         verbose_name_plural = 'Корзина покупок'
         constraints = [
