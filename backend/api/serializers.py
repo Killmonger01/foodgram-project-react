@@ -202,12 +202,11 @@ class RecipeWriteSerializer(ModelSerializer):
         if name.isdigit():
             return False
         return name
- 
+
     def not_sign(self, obj):
         chars = "".join(set(re.compile(r"[\w.@+-]").sub("", obj.name)))
         if chars:
             return False
-
 
     @transaction.atomic
     def create_ingredients_amounts(self, ingredients, recipe):
