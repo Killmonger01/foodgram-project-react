@@ -165,7 +165,7 @@ class RecipeWriteSerializer(ModelSerializer):
             'text',
             'cooking_time',
         )
-    
+
     def validate_name(self, value):
         if not re.search(r'[a-zA-Z]', value):
             raise ValidationError('Название должно содержать букву.')
