@@ -165,6 +165,11 @@ class RecipeWriteSerializer(ModelSerializer):
             'text',
             'cooking_time',
         )
+    
+    def validate_name(self, value):
+        if not re.search(r'[a-zA-Z]', value):
+            raise ValidationError('Название должно содержать букву.')
+        return value
 
     def validate_ingredients(self, value):
         ingredients = value
@@ -196,17 +201,6 @@ class RecipeWriteSerializer(ModelSerializer):
                 raise ValidationError({'tags': 'Теги должны быть уникальными'})
             tags_list.append(tag)
         return value
-
-    def isdigit(self, obj):
-        name = obj.name
-        if name.isdigit():
-            return False
-        return name
-
-    def not_sign(self, obj):
-        chars = "".join(set(re.compile(r"[\w.@+-]").sub("", obj.name)))
-        if chars:
-            return False
 
     @transaction.atomic
     def create_ingredients_amounts(self, ingredients, recipe):
