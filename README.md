@@ -19,3 +19,7 @@ SECRET_KEY = ...
 ```
 docker compose up --build
 ```
+# Ссылка на сайт
+```
+https://diplom.ddns.net/
+```
