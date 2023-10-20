@@ -1,24 +1,28 @@
-import re
-
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, SerializerMethodField
 from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import ModelSerializer
+from users.models import Subscribe
+import re
 
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
-from users.models import Subscribe, User
+User = get_user_model()
 
 
-class UserCreateSerializerWithEmail(UserCreateSerializer):
-    class Meta(UserCreateSerializer.Meta):
+class CustomUserCreateSerializer(UserCreateSerializer):
+    class Meta:
         model = User
-        fields = ('email', 'password', 'username')
+        fields = tuple(User.REQUIRED_FIELDS) + (
+            User.USERNAME_FIELD,
+            'password',
+        )
 
 
 class CustomUserSerializer(UserSerializer):
@@ -50,7 +54,7 @@ class SubscribeSerializer(CustomUserSerializer):
         fields = CustomUserSerializer.Meta.fields + (
             'recipes_count', 'recipes'
         )
-        read_only_fields = ('email', 'username', 'first_name', 'last_name',)
+        read_only_fields = ('email', 'username', 'first_name', 'last_name', )
 
     def validate(self, data):
         author = self.instance
@@ -80,16 +84,16 @@ class SubscribeSerializer(CustomUserSerializer):
         return serializer.data
 
 
-class TagSerializer(ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ('name', 'color', 'slug',)
-
-
 class IngredientSerializer(ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ('name', 'measurement_unit',)
+        fields = '__all__'
+
+
+class TagSerializer(ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = '__all__'
 
 
 class RecipeReadSerializer(ModelSerializer):
@@ -166,11 +170,6 @@ class RecipeWriteSerializer(ModelSerializer):
             'cooking_time',
         )
 
-    def validate_name(self, value):
-        if not re.search(r'[a-zA-Z]', value):
-            raise ValidationError('Название должно содержать букву.')
-        return value
-
     def validate_ingredients(self, value):
         ingredients = value
         if not ingredients:
@@ -190,6 +189,15 @@ class RecipeWriteSerializer(ModelSerializer):
                 })
             ingredients_list.append(ingredient)
         return value
+    def validate_name(self, value):
+        if not re.search(r'[a-zA-Z]', value):
+            raise ValidationError('Название должно содержать букву.')
+        russian_pattern = re.compile(r'[а-яА-ЯёЁ]')
+        matches = re.findall(russian_pattern, value)
+        if len(matches) == 0:
+            raise ValidationError('Название должно содержать букву.')
+        return value
+
 
     def validate_tags(self, value):
         tags = value
@@ -198,7 +206,7 @@ class RecipeWriteSerializer(ModelSerializer):
         tags_list = []
         for tag in tags:
             if tag in tags_list:
-                raise ValidationError({'tags': 'Теги должны быть уникальными'})
+                raise ValidationError({'tags': 'Теги должны быть уникальными!'})
             tags_list.append(tag)
         return value
 
@@ -229,8 +237,7 @@ class RecipeWriteSerializer(ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         instance.ingredients.clear()
-        self.create_ingredients_amounts(recipe=instance,
-                                        ingredients=ingredients)
+        self.create_ingredients_amounts(recipe=instance, ingredients=ingredients)
         instance.save()
         return instance
 

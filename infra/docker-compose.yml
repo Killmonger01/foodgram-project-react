@@ -39,3 +39,4 @@ services:
       - media:/app/media
     environment:
     - PYTHONUNBUFFERED=1
+

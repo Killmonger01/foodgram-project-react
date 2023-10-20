@@ -20,11 +20,6 @@ class RecipeAdmin(admin.ModelAdmin):
     def added_in_favorites(self, obj):
         return obj.favorites.count()
 
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if not obj.tags.exists():
-            raise admin.ValidationError('Должен быть выбран хотя бы один тег.')
-
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):

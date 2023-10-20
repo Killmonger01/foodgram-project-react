@@ -6,6 +6,7 @@ from django.db.models import CheckConstraint
 from core.constans import (EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH,
                            PASSWORD_MAX_LENGTH, FIRST_NAME_MAX_LENGTH,
                            LAST_NAME_MAX_LENGTH)
+
 from core.validators import validate_username
 
 

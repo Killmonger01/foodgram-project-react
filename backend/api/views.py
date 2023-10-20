@@ -49,6 +49,7 @@ class TagViewSet(ReadOnlyModelViewSet):
 
 class CustomUserViewSet(UserViewSet):
     queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
     serializer_class = CustomUserSerializer
     pagination_class = CustomPagination
 
@@ -80,7 +81,7 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=[IsAuthenticated]
     )
     def subscriptions(self, request):
-        queryset = User.objects.filter(subscribing__user=request.user)
+        queryset = User.objects.filter(subscriber3__user=request.user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(pages,
                                          many=True,
@@ -88,10 +89,11 @@ class CustomUserViewSet(UserViewSet):
         return self.get_paginated_response(serializer.data)
 
 
+
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
     pagination_class = CustomPagination
+    permission_classes = (IsSuperUserOrOwnerOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
